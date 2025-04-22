@@ -1,0 +1,1646 @@
+[V0_FILE]tsx:file="app/page.tsx"
+import { Search } from "@/components/search";
+import { FeaturedProperties } from "@/components/featured-properties";
+import { HeroSection } from "@/components/hero-section";
+import { AIAssistantButton } from "@/components/ai-assistant-button";
+
+export default function HomePage() {
+  return (
+    <main className="min-h-screen">
+      <HeroSection />
+      <div className="container mx-auto px-4 py-12">
+        <h2 className="text-3xl font-bold mb-8 text-center">Find Your Dream Home</h2>
+        <Search />
+        <FeaturedProperties />
+      </div>
+      <AIAssistantButton />
+    </main>
+  );
+}
+[V0_FILE]tsx:file="app/loading.tsx" isFixed
+export default function Loading() {
+  return null
+}
+[V0_FILE]tsx:file="components/hero-section.tsx"
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
+export function HeroSection() {
+  return (
+    <div className="relative h-[600px] w-full">
+      <Image
+        src="/placeholder.svg?height=600&width=1920"
+        alt="Modern home exterior"
+        fill
+        className="object-cover brightness-75"
+        priority
+      />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30" />
+      <div className="relative container mx-auto px-4 h-full flex flex-col justify-center">
+        <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
+          Find Your Perfect Home
+        </h1>
+        <p className="text-xl text-white/90 max-w-2xl mb-8">
+          Discover thousands of properties with our intelligent search and AI assistant to guide you every step of the way.
+        </p>
+        <div className="flex flex-wrap gap-4">
+          <Button size="lg" asChild>
+            <Link href="/search">Start Searching</Link>
+          </Button>
+          <Button size="lg" variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
+            <Link href="/ai-assistant">Ask Our AI Assistant</Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+[V0_FILE]tsx:file="components/search.tsx"
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+} from "@/components/ui/card";
+import { SearchIcon } from 'lucide-react';
+
+export function Search() {
+  const router = useRouter();
+  const [location, setLocation] = useState("");
+  const [priceRange, setPriceRange] = useState([0, 1000000]);
+  const [propertyType, setPropertyType] = useState("any");
+  const [bedrooms, setBedrooms] = useState("any");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams({
+      location,
+      minPrice: priceRange[0].toString(),
+      maxPrice: priceRange[1].toString(),
+      propertyType,
+      bedrooms,
+    });
+    router.push(`/search?${params.toString()}`);
+  };
+
+  return (
+    <Card className="mb-12">
+      <CardContent className="pt-6">
+        <form onSubmit={handleSearch}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div>
+              <label htmlFor="location" className="block text-sm font-medium mb-1">
+                Location
+              </label>
+              <Input
+                id="location"
+                placeholder="City, neighborhood, or ZIP"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="property-type" className="block text-sm font-medium mb-1">
+                Property Type
+              </label>
+              <Select value={propertyType} onValueChange={setPropertyType}>
+                <SelectTrigger id="property-type">
+                  <SelectValue placeholder="Any" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="any">Any</SelectItem>
+                  <SelectItem value="house">House</SelectItem>
+                  <SelectItem value="apartment">Apartment</SelectItem>
+                  <SelectItem value="condo">Condo</SelectItem>
+                  <SelectItem value="townhouse">Townhouse</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label htmlFor="bedrooms" className="block text-sm font-medium mb-1">
+                Bedrooms
+              </label>
+              <Select value={bedrooms} onValueChange={setBedrooms}>
+                <SelectTrigger id="bedrooms">
+                  <SelectValue placeholder="Any" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="any">Any</SelectItem>
+                  <SelectItem value="1">1+</SelectItem>
+                  <SelectItem value="2">2+</SelectItem>
+                  <SelectItem value="3">3+</SelectItem>
+                  <SelectItem value="4">4+</SelectItem>
+                  <SelectItem value="5">5+</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label htmlFor="price-range" className="block text-sm font-medium mb-1">
+                Price Range: ${priceRange[0].toLocaleString()} - ${priceRange[1].toLocaleString()}
+              </label>
+              <Slider
+                id="price-range"
+                defaultValue={[0, 1000000]}
+                max={2000000}
+                step={50000}
+                onValueChange={setPriceRange}
+                className="mt-4"
+              />
+            </div>
+          </div>
+          
+          <div className="flex justify-center">
+            <Button type="submit" className="w-full md:w-auto" size="lg">
+              <SearchIcon className="mr-2 h-4 w-4" />
+              Search Properties
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+[V0_FILE]tsx:file="components/featured-properties.tsx"
+"use client";
+
+import { useState } from "react";
+import { PropertyCard } from "@/components/property-card";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+// Mock data for featured properties
+const featuredProperties = [
+  {
+    id: 1,
+    title: "Modern Apartment in Downtown",
+    price: 450000,
+    address: "123 Main St, Downtown",
+    bedrooms: 2,
+    bathrooms: 2,
+    sqft: 1200,
+    image: "/placeholder.svg?height=300&width=400",
+  },
+  {
+    id: 2,
+    title: "Spacious Family Home",
+    price: 750000,
+    address: "456 Oak Ave, Suburbia",
+    bedrooms: 4,
+    bathrooms: 3,
+    sqft: 2500,
+    image: "/placeholder.svg?height=300&width=400",
+  },
+  {
+    id: 3,
+    title: "Luxury Condo with Ocean View",
+    price: 1200000,
+    address: "789 Beach Blvd, Oceanside",
+    bedrooms: 3,
+    bathrooms: 2,
+    sqft: 1800,
+    image: "/placeholder.svg?height=300&width=400",
+  },
+  {
+    id: 4,
+    title: "Charming Cottage",
+    price: 350000,
+    address: "101 Maple Dr, Historic District",
+    bedrooms: 2,
+    bathrooms: 1,
+    sqft: 1000,
+    image: "/placeholder.svg?height=300&width=400",
+  },
+  {
+    id: 5,
+    title: "Modern Townhouse",
+    price: 550000,
+    address: "202 Pine St, Midtown",
+    bedrooms: 3,
+    bathrooms: 2.5,
+    sqft: 1600,
+    image: "/placeholder.svg?height=300&width=400",
+  },
+  {
+    id: 6,
+    title: "Penthouse Suite",
+    price: 1500000,
+    address: "303 Skyline Ave, Downtown",
+    bedrooms: 3,
+    bathrooms: 3,
+    sqft: 2200,
+    image: "/placeholder.svg?height=300&width=400",
+  },
+];
+
+export function FeaturedProperties() {
+  const [currentPage, setCurrentPage] = useState(0);
+  const propertiesPerPage = 3;
+  const totalPages = Math.ceil(featuredProperties.length / propertiesPerPage);
+  
+  const currentProperties = featuredProperties.slice(
+    currentPage * propertiesPerPage,
+    (currentPage + 1) * propertiesPerPage
+  );
+  
+  const nextPage = () => {
+    setCurrentPage((prev) => (prev + 1) % totalPages);
+  };
+  
+  const prevPage = () => {
+    setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Featured Properties</h2>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={prevPage}
+            disabled={currentPage === 0}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={nextPage}
+            disabled={currentPage === totalPages - 1}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {currentProperties.map((property) => (
+          <PropertyCard key={property.id} property={property} />
+        ))}
+      </div>
+    </div>
+  );
+}
+[V0_FILE]tsx:file="components/property-card.tsx"
+import Image from "next/image";
+import Link from "next/link";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Bed, Bath, Square, Heart } from 'lucide-react';
+
+interface Property {
+  id: number;
+  title: string;
+  price: number;
+  address: string;
+  bedrooms: number;
+  bathrooms: number;
+  sqft: number;
+  image: string;
+}
+
+interface PropertyCardProps {
+  property: Property;
+}
+
+export function PropertyCard({ property }: PropertyCardProps) {
+  return (
+    <Card className="overflow-hidden transition-all hover:shadow-lg">
+      <div className="relative h-48 w-full">
+        <Image
+          src={property.image || "/placeholder.svg"}
+          alt={property.title}
+          fill
+          className="object-cover"
+        />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-2 right-2 bg-white/80 hover:bg-white/90 rounded-full"
+        >
+          <Heart className="h-5 w-5 text-rose-500" />
+        </Button>
+      </div>
+      
+      <CardContent className="p-4">
+        <h3 className="text-xl font-semibold mb-1 truncate">{property.title}</h3>
+        <p className="text-lg font-bold text-emerald-600 mb-2">
+          ${property.price.toLocaleString()}
+        </p>
+        <p className="text-sm text-gray-500 mb-4 truncate">{property.address}</p>
+        
+        <div className="flex justify-between text-sm text-gray-600">
+          <div className="flex items-center">
+            <Bed className="h-4 w-4 mr-1" />
+            <span>{property.bedrooms} bd</span>
+          </div>
+          <div className="flex items-center">
+            <Bath className="h-4 w-4 mr-1" />
+            <span>{property.bathrooms} ba</span>
+          </div>
+          <div className="flex items-center">
+            <Square className="h-4 w-4 mr-1" />
+            <span>{property.sqft.toLocaleString()} sqft</span>
+          </div>
+        </div>
+      </CardContent>
+      
+      <CardFooter className="p-4 pt-0">
+        <Button asChild className="w-full">
+          <Link href={`/property/${property.id}`}>View Details</Link>
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
+[V0_FILE]tsx:file="components/ai-assistant-button.tsx"
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { AIAssistantDialog } from "@/components/ai-assistant-dialog";
+import { Bot } from 'lucide-react';
+
+export function AIAssistantButton() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <Button
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-6 right-6 rounded-full h-14 w-14 shadow-lg"
+        size="icon"
+      >
+        <Bot className="h-6 w-6" />
+      </Button>
+      <AIAssistantDialog open={isOpen} onOpenChange={setIsOpen} />
+    </>
+  );
+}
+[V0_FILE]tsx:file="components/ai-assistant-dialog.tsx"
+"use client";
+
+import { useState, useRef, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar } from "@/components/ui/avatar";
+import { Send, Bot, User } from 'lucide-react';
+
+interface AIAssistantDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps) {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "assistant",
+      content: "Hi there! I'm your real estate AI assistant. How can I help you find your perfect home today?",
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current;
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim()) return;
+
+    const userMessage: Message = {
+      role: "user",
+      content: input,
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
+
+    // Simulate AI response
+    setTimeout(() => {
+      const responses = [
+        "I found several 3-bedroom homes in your area between $400,000 and $600,000. Would you like to see properties with a garage or pool?",
+        "Based on your preferences, I recommend looking in the North Hills neighborhood. It has great schools and is close to shopping centers.",
+        "I can help you find properties with a home office. How many square feet are you looking for?",
+        "There are 12 properties matching your criteria. Would you like me to sort them by price or by newest listings?",
+        "Have you considered condos as well? There are some beautiful options with amenities like gyms and pools in your price range."
+      ];
+      
+      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: randomResponse,
+      };
+      
+      setMessages((prev) => [...prev, assistantMessage]);
+      setIsLoading(false);
+    }, 1500);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px] h-[600px] flex flex-col p-0">
+        <DialogHeader className="p-4 border-b">
+          <DialogTitle className="flex items-center">
+            <Bot className="mr-2 h-5 w-5 text-emerald-500" />
+            Real Estate AI Assistant
+          </DialogTitle>
+        </DialogHeader>
+        
+        <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+          <div className="space-y-4">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex ${
+                  message.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div
+                  className={`flex max-w-[80%] ${
+                    message.role === "user" ? "flex-row-reverse" : "flex-row"
+                  }`}
+                >
+                  <Avatar className={`h-8 w-8 ${message.role === "user" ? "ml-2" : "mr-2"}`}>
+                    {message.role === "user" ? (
+                      <User className="h-5 w-5" />
+                    ) : (
+                      <Bot className="h-5 w-5" />
+                    )}
+                  </Avatar>
+                  <div
+                    className={`rounded-lg p-3 ${
+                      message.role === "user"
+                        ? "bg-emerald-500 text-white"
+                        : "bg-gray-100 dark:bg-gray-800"
+                    }`}
+                  >
+                    {message.content}
+                  </div>
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="flex flex-row">
+                  <Avatar className="h-8 w-8 mr-2">
+                    <Bot className="h-5 w-5" />
+                  </Avatar>
+                  <div className="rounded-lg p-3 bg-gray-100 dark:bg-gray-800">
+                    <div className="flex space-x-1">
+                      <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+        
+        <DialogFooter className="p-4 border-t">
+          <div className="flex w-full items-center space-x-2">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask about properties, neighborhoods, or home buying tips..."
+              className="flex-1 min-h-[60px] max-h-[120px]"
+            />
+            <Button
+              type="submit"
+              size="icon"
+              onClick={handleSend}
+              disabled={isLoading || !input.trim()}
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+[V0_FILE]tsx:file="app/search/page.tsx"
+import { SearchResults } from "@/components/search-results";
+import { SearchFilters } from "@/components/search-filters";
+import { AIAssistantButton } from "@/components/ai-assistant-button";
+
+interface SearchPageProps {
+  searchParams: {
+    location?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    propertyType?: string;
+    bedrooms?: string;
+  };
+}
+
+export default function SearchPage({ searchParams }: SearchPageProps) {
+  return (
+    <main className="min-h-screen">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">Property Search Results</h1>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-1">
+            <SearchFilters initialFilters={searchParams} />
+          </div>
+          <div className="lg:col-span-3">
+            <SearchResults searchParams={searchParams} />
+          </div>
+        </div>
+      </div>
+      <AIAssistantButton />
+    </main>
+  );
+}
+[V0_FILE]tsx:file="app/search/loading.tsx" isFixed
+export default function Loading() {
+  return null
+}
+[V0_FILE]tsx:file="components/search-filters.tsx"
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { SearchIcon, Filter } from 'lucide-react';
+
+interface SearchFiltersProps {
+  initialFilters: {
+    location?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    propertyType?: string;
+    bedrooms?: string;
+  };
+}
+
+export function SearchFilters({ initialFilters }: SearchFiltersProps) {
+  const router = useRouter();
+  const [location, setLocation] = useState(initialFilters.location || "");
+  const [priceRange, setPriceRange] = useState([
+    parseInt(initialFilters.minPrice || "0"),
+    parseInt(initialFilters.maxPrice || "1000000"),
+  ]);
+  const [propertyType, setPropertyType] = useState(initialFilters.propertyType || "any");
+  const [bedrooms, setBedrooms] = useState(initialFilters.bedrooms || "any");
+  const [features, setFeatures] = useState({
+    pool: false,
+    garage: false,
+    garden: false,
+    airConditioning: false,
+    furnished: false,
+  });
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const params = new URLSearchParams();
+    if (location) params.set("location", location);
+    params.set("minPrice", priceRange[0].toString());
+    params.set("maxPrice", priceRange[1].toString());
+    if (propertyType !== "any") params.set("propertyType", propertyType);
+    if (bedrooms !== "any") params.set("bedrooms", bedrooms);
+    
+    // Add selected features
+    Object.entries(features).forEach(([key, value]) => {
+      if (value) params.append("features", key);
+    });
+    
+    router.push(`/search?${params.toString()}`);
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <Filter className="mr-2 h-5 w-5" />
+          Filters
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSearch} className="space-y-4">
+          <div>
+            <label htmlFor="location" className="block text-sm font-medium mb-1">
+              Location
+            </label>
+            <Input
+              id="location"
+              placeholder="City, neighborhood, or ZIP"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
+          </div>
+          
+          <div>
+            <label htmlFor="price-range" className="block text-sm font-medium mb-1">
+              Price Range: ${priceRange[0].toLocaleString()} - ${priceRange[1].toLocaleString()}
+            </label>
+            <Slider
+              id="price-range"
+              value={priceRange}
+              max={2000000}
+              step={50000}
+              onValueChange={setPriceRange}
+              className="mt-4"
+            />
+          </div>
+          
+          <div>
+            <label htmlFor="property-type" className="block text-sm font-medium mb-1">
+              Property Type
+            </label>
+            <Select value={propertyType} onValueChange={setPropertyType}>
+              <SelectTrigger id="property-type">
+                <SelectValue placeholder="Any" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">Any</SelectItem>
+                <SelectItem value="house">House</SelectItem>
+                <SelectItem value="apartment">Apartment</SelectItem>
+                <SelectItem value="condo">Condo</SelectItem>
+                <SelectItem value="townhouse">Townhouse</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <label htmlFor="bedrooms" className="block text-sm font-medium mb-1">
+              Bedrooms
+            </label>
+            <Select value={bedrooms} onValueChange={setBedrooms}>
+              <SelectTrigger id="bedrooms">
+                <SelectValue placeholder="Any" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">Any</SelectItem>
+                <SelectItem value="1">1+</SelectItem>
+                <SelectItem value="2">2+</SelectItem>
+                <SelectItem value="3">3+</SelectItem>
+                <SelectItem value="4">4+</SelectItem>
+                <SelectItem value="5">5+</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <h3 className="text-sm font-medium mb-2">Features</h3>
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <Checkbox
+                  id="pool"
+                  checked={features.pool}
+                  onCheckedChange={(checked) =>
+                    setFeatures({ ...features, pool: checked === true })
+                  }
+                />
+                <Label htmlFor="pool" className="ml-2">Pool</Label>
+              </div>
+              <div className="flex items-center">
+                <Checkbox
+                  id="garage"
+                  checked={features.garage}
+                  onCheckedChange={(checked) =>
+                    setFeatures({ ...features, garage: checked === true })
+                  }
+                />
+                <Label htmlFor="garage" className="ml-2">Garage</Label>
+              </div>
+              <div className="flex items-center">
+                <Checkbox
+                  id="garden"
+                  checked={features.garden}
+                  onCheckedChange={(checked) =>
+                    setFeatures({ ...features, garden: checked === true })
+                  }
+                />
+                <Label htmlFor="garden" className="ml-2">Garden</Label>
+              </div>
+              <div className="flex items-center">
+                <Checkbox
+                  id="airConditioning"
+                  checked={features.airConditioning}
+                  onCheckedChange={(checked) =>
+                    setFeatures({ ...features, airConditioning: checked === true })
+                  }
+                />
+                <Label htmlFor="airConditioning" className="ml-2">Air Conditioning</Label>
+              </div>
+              <div className="flex items-center">
+                <Checkbox
+                  id="furnished"
+                  checked={features.furnished}
+                  onCheckedChange={(checked) =>
+                    setFeatures({ ...features, furnished: checked === true })
+                  }
+                />
+                <Label htmlFor="furnished" className="ml-2">Furnished</Label>
+              </div>
+            </div>
+          </div>
+          
+          <Button type="submit" className="w-full">
+            <SearchIcon className="mr-2 h-4 w-4" />
+            Apply Filters
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+[V0_FILE]tsx:file="components/search-results.tsx"
+"use client";
+
+import { useState } from "react";
+import { PropertyCard } from "@/components/property-card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { ArrowUpDown, Grid, List } from 'lucide-react';
+
+// Mock data for search results
+const mockProperties = [
+  {
+    id: 1,
+    title: "Modern Apartment in Downtown",
+    price: 450000,
+    address: "123 Main St, Downtown",
+    bedrooms: 2,
+    bathrooms: 2,
+    sqft: 1200,
+    image: "/placeholder.svg?height=300&width=400",
+  },
+  {
+    id: 2,
+    title: "Spacious Family Home",
+    price: 750000,
+    address: "456 Oak Ave, Suburbia",
+    bedrooms: 4,
+    bathrooms: 3,
+    sqft: 2500,
+    image: "/placeholder.svg?height=300&width=400",
+  },
+  {
+    id: 3,
+    title: "Luxury Condo with Ocean View",
+    price: 1200000,
+    address: "789 Beach Blvd, Oceanside",
+    bedrooms: 3,
+    bathrooms: 2,
+    sqft: 1800,
+    image: "/placeholder.svg?height=300&width=400",
+  },
+  {
+    id: 4,
+    title: "Charming Cottage",
+    price: 350000,
+    address: "101 Maple Dr, Historic District",
+    bedrooms: 2,
+    bathrooms: 1,
+    sqft: 1000,
+    image: "/placeholder.svg?height=300&width=400",
+  },
+  {
+    id: 5,
+    title: "Modern Townhouse",
+    price: 550000,
+    address: "202 Pine St, Midtown",
+    bedrooms: 3,
+    bathrooms: 2.5,
+    sqft: 1600,
+    image: "/placeholder.svg?height=300&width=400",
+  },
+  {
+    id: 6,
+    title: "Penthouse Suite",
+    price: 1500000,
+    address: "303 Skyline Ave, Downtown",
+    bedrooms: 3,
+    bathrooms: 3,
+    sqft: 2200,
+    image: "/placeholder.svg?height=300&width=400",
+  },
+  {
+    id: 7,
+    title: "Cozy Studio Apartment",
+    price: 275000,
+    address: "404 College St, University District",
+    bedrooms: 1,
+    bathrooms: 1,
+    sqft: 650,
+    image: "/placeholder.svg?height=300&width=400",
+  },
+  {
+    id: 8,
+    title: "Suburban Ranch Home",
+    price: 625000,
+    address: "505 Meadow Ln, Green Valley",
+    bedrooms: 3,
+    bathrooms: 2,
+    sqft: 1800,
+    image: "/placeholder.svg?height=300&width=400",
+  },
+];
+
+interface SearchResultsProps {
+  searchParams: {
+    location?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    propertyType?: string;
+    bedrooms?: string;
+  };
+}
+
+export function SearchResults({ searchParams }: SearchResultsProps) {
+  const [sortBy, setSortBy] = useState("price-asc");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  
+  // Filter properties based on search params
+  // In a real app, this would be done on the server
+  const filteredProperties = mockProperties.filter((property) => {
+    if (
+      searchParams.minPrice &&
+      property.price < parseInt(searchParams.minPrice)
+    )
+      return false;
+    
+    if (
+      searchParams.maxPrice &&
+      property.price > parseInt(searchParams.maxPrice)
+    )
+      return false;
+    
+    if (
+      searchParams.bedrooms &&
+      searchParams.bedrooms !== "any" &&
+      property.bedrooms < parseInt(searchParams.bedrooms)
+    )
+      return false;
+    
+    return true;
+  });
+  
+  // Sort properties
+  const sortedProperties = [...filteredProperties].sort((a, b) => {
+    switch (sortBy) {
+      case "price-asc":
+        return a.price - b.price;
+      case "price-desc":
+        return b.price - a.price;
+      case "beds-asc":
+        return a.bedrooms - b.bedrooms;
+      case "beds-desc":
+        return b.bedrooms - a.bedrooms;
+      case "sqft-asc":
+        return a.sqft - b.sqft;
+      case "sqft-desc":
+        return b.sqft - a.sqft;
+      default:
+        return 0;
+    }
+  });
+
+  return (
+    <div>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <p className="text-gray-600">
+          {sortedProperties.length} properties found
+          {searchParams.location ? ` in ${searchParams.location}` : ""}
+        </p>
+        
+        <div className="flex items-center gap-2">
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="price-asc">Price: Low to High</SelectItem>
+              <SelectItem value="price-desc">Price: High to Low</SelectItem>
+              <SelectItem value="beds-asc">Beds: Low to High</SelectItem>
+              <SelectItem value="beds-desc">Beds: High to Low</SelectItem>
+              <SelectItem value="sqft-asc">Sqft: Low to High</SelectItem>
+              <SelectItem value="sqft-desc">Sqft: High to Low</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <div className="flex border rounded-md">
+            <Button
+              variant={viewMode === "grid" ? "default" : "ghost"}
+              size="icon"
+              onClick={() => setViewMode("grid")}
+              className="rounded-r-none"
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "list" ? "default" : "ghost"}
+              size="icon"
+              onClick={() => setViewMode("list")}
+              className="rounded-l-none"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+      
+      <div className={
+        viewMode === "grid"
+          ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          : "space-y-4"
+      }>
+        {sortedProperties.map((property) => (
+          <PropertyCard key={property.id} property={property} />
+        ))}
+      </div>
+      
+      {sortedProperties.length === 0 && (
+        <div className="text-center py-12">
+          <h3 className="text-xl font-semibold mb-2">No properties found</h3>
+          <p className="text-gray-600">
+            Try adjusting your search filters to find more properties.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+[V0_FILE]tsx:file="app/property/[id]/page.tsx"
+import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Bed, Bath, Square, MapPin, Calendar, Heart, Share2 } from 'lucide-react';
+import { PropertyGallery } from "@/components/property-gallery";
+import { PropertyMap } from "@/components/property-map";
+import { AIAssistantButton } from "@/components/ai-assistant-button";
+
+// Mock data for property details
+const mockPropertyDetails = {
+  id: 1,
+  title: "Modern Apartment in Downtown",
+  price: 450000,
+  address: "123 Main St, Downtown, City, 12345",
+  bedrooms: 2,
+  bathrooms: 2,
+  sqft: 1200,
+  description: "This beautiful modern apartment is located in the heart of downtown. It features an open floor plan, high ceilings, and large windows that provide plenty of natural light. The kitchen has been recently renovated with high-end stainless steel appliances and quartz countertops. The primary bedroom has a walk-in closet and an en-suite bathroom with a double vanity. The second bedroom is spacious and can also be used as a home office. The building offers amenities such as a fitness center, rooftop terrace, and 24-hour concierge service.",
+  features: [
+    "Hardwood floors",
+    "Central air conditioning",
+    "In-unit washer and dryer",
+    "Stainless steel appliances",
+    "Quartz countertops",
+    "Walk-in closet",
+    "Double vanity in primary bathroom",
+    "Large windows",
+    "Open floor plan",
+    "High ceilings",
+  ],
+  yearBuilt: 2018,
+  images: [
+    "/placeholder.svg?height=600&width=800",
+    "/placeholder.svg?height=600&width=800",
+    "/placeholder.svg?height=600&width=800",
+    "/placeholder.svg?height=600&width=800",
+  ],
+  agent: {
+    name: "Jane Smith",
+    phone: "(555) 123-4567",
+    email: "jane.smith@realestate.com",
+    image: "/placeholder.svg?height=200&width=200",
+  },
+};
+
+export default function PropertyPage({ params }: { params: { id: string } }) {
+  // In a real app, you would fetch the property data based on the ID
+  const property = mockPropertyDetails;
+
+  return (
+    <main className="min-h-screen pb-12">
+      <div className="container mx-auto px-4">
+        <div className="py-6">
+          <Link href="/search" className="text-emerald-600 hover:underline mb-4 inline-block">
+            ← Back to search results
+          </Link>
+          
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">{property.title}</h1>
+              <p className="text-gray-600 flex items-center">
+                <MapPin className="h-4 w-4 mr-1" />
+                {property.address}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">
+                <Heart className="h-4 w-4 mr-2" />
+                Save
+              </Button>
+              <Button variant="outline" size="sm">
+                <Share2 className="h-4 w-4 mr-2" />
+                Share
+              </Button>
+            </div>
+          </div>
+          
+          <PropertyGallery images={property.images} />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+            <div className="lg:col-span-2">
+              <Card className="mb-8">
+                <CardContent className="p-6">
+                  <div className="flex flex-wrap gap-6 mb-6">
+                    <div className="flex items-center">
+                      <Bed className="h-5 w-5 mr-2 text-emerald-600" />
+                      <div>
+                        <p className="font-semibold">{property.bedrooms}</p>
+                        <p className="text-sm text-gray-500">Bedrooms</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <Bath className="h-5 w-5 mr-2 text-emerald-600" />
+                      <div>
+                        <p className="font-semibold">{property.bathrooms}</p>
+                        <p className="text-sm text-gray-500">Bathrooms</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <Square className="h-5 w-5 mr-2 text-emerald-600" />
+                      <div>
+                        <p className="font-semibold">{property.sqft.toLocaleString()}</p>
+                        <p className="text-sm text-gray-500">Square Feet</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <Calendar className="h-5 w-5 mr-2 text-emerald-600" />
+                      <div>
+                        <p className="font-semibold">{property.yearBuilt}</p>
+                        <p className="text-sm text-gray-500">Year Built</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="mb-6">
+                    <h2 className="text-xl font-bold mb-3">Description</h2>
+                    <p className="text-gray-700 whitespace-pre-line">{property.description}</p>
+                  </div>
+                  
+                  <div>
+                    <h2 className="text-xl font-bold mb-3">Features</h2>
+                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {property.features.map((feature, index) => (
+                        <li key={index} className="flex items-center">
+                          <div className="h-2 w-2 rounded-full bg-emerald-500 mr-2"></div>
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="mb-8">
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-bold mb-4">Location</h2>
+                  <PropertyMap address={property.address} />
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div>
+              <Card className="sticky top-4">
+                <CardContent className="p-6">
+                  <div className="text-2xl font-bold text-emerald-600 mb-4">
+                    ${property.price.toLocaleString()}
+                  </div>
+                  
+                  <div className="space-y-4 mb-6">
+                    <Button className="w-full">Schedule a Tour</Button>
+                    <Button variant="outline" className="w-full">Request Info</Button>
+                  </div>
+                  
+                  <div className="border-t pt-4">
+                    <h3 className="font-semibold mb-3">Listing Agent</h3>
+                    <div className="flex items-center">
+                      <div className="relative h-12 w-12 rounded-full overflow-hidden mr-3">
+                        <Image
+                          src={property.agent.image || "/placeholder.svg"}
+                          alt={property.agent.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div>
+                        <p className="font-medium">{property.agent.name}</p>
+                        <p className="text-sm text-gray-600">{property.agent.phone}</p>
+                        <p className="text-sm text-gray-600">{property.agent.email}</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+      <AIAssistantButton />
+    </main>
+  );
+}
+[V0_FILE]tsx:file="components/property-gallery.tsx"
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+
+interface PropertyGalleryProps {
+  images: string[];
+}
+
+export function PropertyGallery({ images }: PropertyGalleryProps) {
+  const [mainImage, setMainImage] = useState(images[0]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const openGallery = (index: number) => {
+    setCurrentIndex(index);
+    setIsOpen(true);
+  };
+
+  const nextImage = () => {
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  return (
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-2 h-[500px]">
+        <div className="md:col-span-3 relative rounded-lg overflow-hidden cursor-pointer" onClick={() => openGallery(0)}>
+          <Image
+            src={mainImage || "/placeholder.svg"}
+            alt="Property main image"
+            fill
+            className="object-cover"
+          />
+        </div>
+        <div className="hidden md:grid grid-rows-2 gap-2">
+          {images.slice(1, 3).map((image, index) => (
+            <div
+              key={index}
+              className="relative rounded-lg overflow-hidden cursor-pointer"
+              onClick={() => {
+                setMainImage(image);
+                openGallery(index + 1);
+              }}
+            >
+              <Image
+                src={image || "/placeholder.svg"}
+                alt={`Property image ${index + 2}`}
+                fill
+                className="object-cover"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-4xl p-0 bg-transparent border-none">
+          <div className="relative h-[80vh] bg-black">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2 z-10 text-white bg-black/50 hover:bg-black/70"
+              onClick={() => setIsOpen(false)}
+            >
+              <X className="h-5 w-5" />
+            </Button>
+            
+            <div className="relative h-full w-full">
+              <Image
+                src={images[currentIndex] || "/placeholder.svg"}
+                alt={`Property image ${currentIndex + 1}`}
+                fill
+                className="object-contain"
+              />
+            </div>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute left-2 top-1/2 -translate-y-1/2 text-white bg-black/50 hover:bg-black/70"
+              onClick={prevImage}
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-white bg-black/50 hover:bg-black/70"
+              onClick={nextImage}
+            >
+              <ChevronRight className="h-6 w-6" />
+            </Button>
+            
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white bg-black/50 px-3 py-1 rounded-full">
+              {currentIndex + 1} / {images.length}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+[V0_FILE]tsx:file="components/property-map.tsx"
+"use client";
+
+import { useEffect, useRef } from "react";
+
+interface PropertyMapProps {
+  address: string;
+}
+
+export function PropertyMap({ address }: PropertyMapProps) {
+  const mapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // In a real app, you would use a mapping API like Google Maps or Mapbox
+    // For this example, we'll just create a placeholder map
+    if (mapRef.current) {
+      const canvas = document.createElement("canvas");
+      canvas.width = mapRef.current.clientWidth;
+      canvas.height = 300;
+      
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        // Draw a simple map placeholder
+        ctx.fillStyle = "#e5e7eb";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw some roads
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 4;
+        
+        // Horizontal roads
+        for (let i = 1; i < 5; i++) {
+          ctx.beginPath();
+          ctx.moveTo(0, i * 60);
+          ctx.lineTo(canvas.width, i * 60);
+          ctx.stroke();
+        }
+        
+        // Vertical roads
+        for (let i = 1; i < 8; i++) {
+          ctx.beginPath();
+          ctx.moveTo(i * 80, 0);
+          ctx.lineTo(i * 80, canvas.height);
+          ctx.stroke();
+        }
+        
+        // Draw a marker for the property
+        ctx.fillStyle = "#10b981";
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, canvas.height / 2, 10, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Add a pulse effect
+        ctx.strokeStyle = "#10b981";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, canvas.height / 2, 15, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // Add text for the address
+        ctx.fillStyle = "#000000";
+        ctx.font = "14px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("Property Location", canvas.width / 2, canvas.height / 2 - 20);
+      }
+      
+      mapRef.current.innerHTML = "";
+      mapRef.current.appendChild(canvas);
+    }
+  }, [address]);
+
+  return (
+    <div ref={mapRef} className="h-[300px] w-full rounded-lg overflow-hidden bg-gray-200">
+      {/* Map will be rendered here */}
+    </div>
+  );
+}
+[V0_FILE]tsx:file="app/ai-assistant/page.tsx"
+import { AIAssistantFullPage } from "@/components/ai-assistant-full-page";
+
+export default function AIAssistantPage() {
+  return (
+    <main className="min-h-screen">
+      <AIAssistantFullPage />
+    </main>
+  );
+}
+[V0_FILE]tsx:file="components/ai-assistant-full-page.tsx"
+"use client";
+
+import { useState, useRef, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar } from "@/components/ui/avatar";
+import { Send, Bot, User, Home, Search, Building, DollarSign, HelpCircle } from 'lucide-react';
+import Link from "next/link";
+
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export function AIAssistantFullPage() {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "assistant",
+      content: "Hi there! I'm your real estate AI assistant. I can help you find properties, understand market trends, explain real estate terms, and answer questions about the home buying process. How can I assist you today?",
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current;
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim()) return;
+
+    const userMessage: Message = {
+      role: "user",
+      content: input,
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
+
+    // Simulate AI response
+    setTimeout(() => {
+      const responses = [
+        "I found several 3-bedroom homes in your area between $400,000 and $600,000. Would you like to see properties with a garage or pool?",
+        "Based on your preferences, I recommend looking in the North Hills neighborhood. It has great schools and is close to shopping centers.",
+        "I can help you find properties with a home office. How many square feet are you looking for?",
+        "There are 12 properties matching your criteria. Would you like me to sort them by price or by newest listings?",
+        "Have you considered condos as well? There are some beautiful options with amenities like gyms and pools in your price range.",
+        "The current mortgage rates are around 6.5% for a 30-year fixed mortgage. Would you like me to calculate what your monthly payment might be?",
+        "When buying a home, you'll need to consider closing costs which typically range from 2-5% of the purchase price. This includes fees for the loan, appraisal, title search, and more.",
+        "A pre-approval letter from a lender can strengthen your offer. It shows sellers that you're serious and financially capable of purchasing their home.",
+      ];
+      
+      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: randomResponse,
+      };
+      
+      setMessages((prev) => [...prev, assistantMessage]);
+      setIsLoading(false);
+    }, 1500);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const suggestedQuestions = [
+    "What are the current mortgage rates?",
+    "How much home can I afford with a $100,000 salary?",
+    "What are the best neighborhoods for families?",
+    "What should I look for during a home inspection?",
+    "How do I make a competitive offer?",
+    "What are closing costs?",
+  ];
+
+  return (
+    <div className="flex h-screen">
+      <div className="w-64 bg-gray-50 border-r p-4 hidden md:block">
+        <Link href="/" className="flex items-center gap-2 font-bold text-xl mb-6">
+          <Home className="h-5 w-5 text-emerald-600" />
+          <span>HomeFind</span>
+        </Link>
+        
+        <nav className="space-y-1">
+          <Link href="/" className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100">
+            <Home className="h-4 w-4" />
+            <span>Home</span>
+          </Link>
+          <Link href="/search" className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100">
+            <Search className="h-4 w-4" />
+            <span>Search</span>
+          </Link>
+          <Link href="/saved" className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100">
+            <Building className="h-4 w-4" />
+            <span>Saved Homes</span>
+          </Link>
+          <Link href="/mortgage" className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100">
+            <DollarSign className="h-4 w-4" />
+            <span>Mortgage</span>
+          </Link>
+          <Link href="/ai-assistant" className="flex items-center gap-2 p-2 rounded-md bg-emerald-50 text-emerald-700">
+            <Bot className="h-4 w-4" />
+            <span>AI Assistant</span>
+          </Link>
+        </nav>
+      </div>
+      
+      <div className="flex-1 flex flex-col">
+        <header className="border-b p-4">
+          <div className="flex items-center gap-2">
+            <Bot className="h-5 w-5 text-emerald-600" />
+            <h1 className="font-bold">Real Estate AI Assistant</h1>
+          </div>
+        </header>
+        
+        <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+          <div className="max-w-3xl mx-auto space-y-4">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex ${
+                  message.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div
+                  className={`flex max-w-[80%] ${
+                    message.role === "user" ? "flex-row-reverse" : "flex-row"
+                  }`}
+                >
+                  <Avatar className={`h-8 w-8 ${message.role === "user" ? "ml-2" : "mr-2"}`}>
+                    {message.role === "user" ? (
+                      <User className="h-5 w-5" />
+                    ) : (
+                      <Bot className="h-5 w-5" />
+                    )}
+                  </Avatar>
+                  <div
+                    className={`rounded-lg p-3 ${
+                      message.role === "user"
+                        ? "bg-emerald-500 text-white"
+                        : "bg-gray-100 dark:bg-gray-800"
+                    }`}
+                  >
+                    {message.content}
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="flex flex-row">
+                  <Avatar className="h-8 w-8 mr-2">
+                    <Bot className="h-5 w-5" />
+                  </Avatar>
+                  <div className="rounded-lg p-3 bg-gray-100 dark:bg-gray-800">
+                    <div className="flex space-x-1">
+                      <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {messages.length === 1 && (
+              <div className="mt-8">
+                <h3 className="text-lg font-medium mb-3 flex items-center">
+                  <HelpCircle className="h-4 w-4 mr-2 text-emerald-600" />
+                  Suggested Questions
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {suggestedQuestions.map((question, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      className="justify-start h-auto py-2 px-3 text-left"
+                      onClick={() => {
+                        setInput(question);
+                        setTimeout(() => handleSend(), 100);
+                      }}
+                    >
+                      {question}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+        
+        <div className="border-t p-4">
+          <div className="max-w-3xl mx-auto flex items-center space-x-2">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask about properties, neighborhoods, or home buying tips..."
+              className="flex-1"
+            />
+            <Button
+              type="submit"
+              size="icon"
+              onClick={handleSend}
+              disabled={isLoading || !input.trim()}
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
